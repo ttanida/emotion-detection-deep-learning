@@ -2,7 +2,7 @@
 A pytorch model that classifies images of people to 3 distinct emotions
 
 ![example of classification](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/images_for_README/sample_img.jpeg)
-<img src="https://github.com/ttanida/emotion-detection-deep-learning/blob/main/images_for_README/sample_img.jpeg" width="400" height="400" />
+<img src="https://github.com/ttanida/emotion-detection-deep-learning/blob/main/images_for_README/sample_img.jpeg" width="600" height="500" />
 
 ## Try it for yourself
 
