@@ -7,8 +7,6 @@ from PIL import Image, ImageDraw, ImageFont
 from facenet_pytorch import MTCNN, extract_face
 
 from my_code.model import EmotionDetectionModel
-from my_code.mtcnn import DetectFaceAndTransformToTensor
-detect_face_and_transform_to_tensor = DetectFaceAndTransformToTensor()
 
 model = EmotionDetectionModel.load_from_checkpoint('models/epoch=25-val_loss=0.36.ckpt')
 model.eval()
@@ -27,7 +25,9 @@ def make_inference(img):
 	img (PIL)"""
 
 	with torch.no_grad():
-		face_img = detect_face_and_transform_to_tensor(img)
+		mtcnn = MTCNN(image_size=160, select_largest=False, margin=20, min_face_size=10, post_process=True, thresholds=[0.8, 0.9, 0.9])
+        face_in_image = mtcnn(image)
+        
 		if face_img is None: # if no face was detected
 			probs = [1/3, 1/3, 1/3]
 			return img, probs
@@ -36,8 +36,6 @@ def make_inference(img):
 			probs = F.softmax(scores, dim=0)
 
 			# draw a red box around detected face
-			mtcnn = MTCNN(image_size=160, select_largest=False, margin=20, min_face_size=10,
-						  post_process=True, thresholds=[0.8, 0.9, 0.9])
 			box, _ = mtcnn.detect(img)
 			img_draw = img.copy()
 			draw = ImageDraw.Draw(img_draw)

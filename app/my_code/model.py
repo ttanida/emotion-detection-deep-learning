@@ -26,7 +26,7 @@ class EmotionDetectionModel(pl.LightningModule):
         for param in self.feature_extractor.parameters():
             param.requires_grad = False
 
-        # 1x1 conv to reduce the dimensionality of feature_extractor output from (1,1,1792) -> (1,1,350)
+        # 1x1 conv to reduce the dimensionality of feature_extractor output from (1,1,1792) -> (1,1,300)
         self.channel_reduction = nn.Conv2d(in_channels=1792, out_channels=300, kernel_size=1)
 
         # linear layers for classification
