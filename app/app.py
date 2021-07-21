@@ -27,8 +27,8 @@ def make_inference(img):
 	with torch.no_grad():
 		mtcnn = MTCNN(image_size=160, select_largest=False, margin=20, min_face_size=10, post_process=True, thresholds=[0.8, 0.9, 0.9])
 		face_img = mtcnn(img)
-        
-		if face_img is None: # if no face was detected
+		
+		if face_img is None:  # if no face was detected
 			return None, None
 		else:
 			scores = model(face_img).squeeze()
@@ -98,6 +98,8 @@ def main():
 					st.write("Outputting prediction...")
 					st.image(img_draw, caption=f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}", use_column_width=True)
 					st.write(f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}")
+					st.image(img_draw, caption=f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}",
+							 use_column_width=True)
 
 	st.write("## How is this made?")
 	st.write("The machine learning happens with a fine-tuned [Inception Resnet V1](https://github.com/timesler/facenet-pytorch) model (PyTorch), \
