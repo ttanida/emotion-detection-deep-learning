@@ -26,11 +26,10 @@ def make_inference(img):
 
 	with torch.no_grad():
 		mtcnn = MTCNN(image_size=160, select_largest=False, margin=20, min_face_size=10, post_process=True, thresholds=[0.8, 0.9, 0.9])
-        face_in_image = mtcnn(image)
+		face_img = mtcnn(img)
         
 		if face_img is None: # if no face was detected
-			probs = [1/3, 1/3, 1/3]
-			return img, probs
+			return None, None
 		else:
 			scores = model(face_img).squeeze()
 			probs = F.softmax(scores, dim=0)
@@ -93,8 +92,12 @@ def main():
 		if st.button("Make a prediction"):
 			with st.spinner("Doing the math..."):
 				img_draw, probs = make_inference(image)
-				st.image(img_draw, caption=f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}", use_column_width=True)
-				st.write(f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}")
+				if img_draw is None:
+					st.write("Face could not be detected... :(")
+				else:
+					st.write("Outputting prediction...")
+					st.image(img_draw, caption=f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}", use_column_width=True)
+					st.write(f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}")
 
 	st.write("## How is this made?")
 	st.write("The machine learning happens with a fine-tuned [Inception Resnet V1](https://github.com/timesler/facenet-pytorch) model (PyTorch), \
