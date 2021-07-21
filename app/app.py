@@ -77,7 +77,6 @@ def make_inference(img):
 		text += f"-> Predicted class: \"{classes[pred_class_index]}\""
 
 		draw.multiline_text((x_coordinate, y_coordinate), text=text, font=font, fill=(255,0,0,0), align="left", spacing=3)
-		probs = probs.tolist()
 
 	return img_draw, probs
 
@@ -109,10 +108,12 @@ def main():
 					st.write("Face could not be detected... :(")
 				else:
 					st.write("Outputting prediction...")
+					classes = ['angry', 'happy', 'sad']
+					pred_class_index = probs.argmax().item()
+					probs = probs.tolist()
 					st.image(img_draw, caption=f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}", use_column_width=True)
 					st.write(f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}")
-					st.image(img_draw, caption=f"angry: {probs[0]:.0%}, happy: {probs[1]:.0%}, sad: {probs[2]:.0%}",
-							 use_column_width=True)
+					st.write(f"predicted class: \"{classes[pred_class_index]}\"")
 
 	st.write("## How is this made?")
 	st.write("The machine learning happens with a fine-tuned [Inception Resnet V1](https://github.com/timesler/facenet-pytorch) model (PyTorch), \
