@@ -2,13 +2,14 @@ import streamlit as st
 
 import torch
 import torch.nn.functional as F
+from torchvision.transforms.functional import rotate
 
 from PIL import Image, ImageDraw, ImageFont
 from facenet_pytorch import MTCNN, extract_face
 
 from my_code.model import EmotionDetectionModel
 
-model = EmotionDetectionModel.load_from_checkpoint('models/epoch=25-val_loss=0.36.ckpt')
+model = EmotionDetectionModel.load_from_checkpoint('model_weights_of_best_model/epoch=25-val_loss=0.36.ckpt')
 model.eval()
 
 
@@ -27,49 +28,59 @@ def make_inference(img):
 	with torch.no_grad():
 		mtcnn = MTCNN(image_size=160, select_largest=False, margin=20, min_face_size=10, post_process=True, thresholds=[0.8, 0.9, 0.9])
 		face_img = mtcnn(img)
-		
+
 		if face_img is None:  # if no face was detected
-			return None, None
-		else:
-			scores = model(face_img).squeeze()
-			probs = F.softmax(scores, dim=0)
+			# use MTCNN with lower threshold for detecting faces
+			mtcnn = MTCNN(image_size=160, select_largest=False, margin=20, min_face_size=10, post_process=True,
+						  thresholds=[0.4, 0.5, 0.5])
+			face_img = mtcnn(img)
+			if face_img is None:  # if still no face was detected
+				return None, None
+			else:
+				# weirdly, the outputted faces are rotated clockwise for 90° for the lower threshold,
+				# so we have to rotate it counter-clockwise to get the correct face image
+				face_img = rotate(face_img, angle=-90)
 
-			# draw a red box around detected face
-			box, _ = mtcnn.detect(img)
-			img_draw = img.copy()
-			draw = ImageDraw.Draw(img_draw)
-			draw.rectangle(box[0], width=5, outline=(255, 0, 0))
+		scores = model(face_img).squeeze()
+		probs = F.softmax(scores, dim=0)
 
-			classes = ['angry', 'happy', 'sad']
-			x_coordinate = box[0][0]
-			y_coordinate = box[0][3]
+		# draw a red box around detected face
+		box, _ = mtcnn.detect(img)
+		img_draw = img.copy()
+		draw = ImageDraw.Draw(img_draw)
+		draw.rectangle(box[0], width=5, outline=(255, 0, 0))
 
-			txt = "probability class \"angry\": 80%"
-			fontsize = 1  # starting font size
+		classes = ['angry', 'happy', 'sad']
+		x_coordinate = box[0][0]
+		y_coordinate = box[0][3]
 
-			# portion of image width you want text width to be
-			img_fraction = 0.5
+		txt = "probability class \"angry\": 80%"
+		fontsize = 1  # starting font size
 
-			font_path = "font/Arialnb.ttf"
+		# portion of image width you want text width to be
+		img_fraction = 0.4
+
+		font_path = "font/Arialnb.ttf"
+		font = ImageFont.truetype(font_path, fontsize)
+		while font.getsize(txt)[0] < img_fraction * img_draw.size[0]:
+			# iterate until the text size is just larger than the criteria
+			fontsize += 1
 			font = ImageFont.truetype(font_path, fontsize)
-			while font.getsize(txt)[0] < img_fraction * img_draw.size[0]:
-				# iterate until the text size is just larger than the criteria
-				fontsize += 1
-				font = ImageFont.truetype(font_path, fontsize)
 
-			fontsize -= 1
-			font = ImageFont.truetype(font_path, fontsize)
-			text = ""
-			for i, class_ in enumerate(classes):
-				text += f"probability class \"{class_}\": {probs[i]:.0%}\n"
+		fontsize -= 1
+		font = ImageFont.truetype(font_path, fontsize)
+		text = ""
+		for i, class_ in enumerate(classes):
+			text += f"probability class \"{class_}\": {probs[i]:.0%}\n"
 
-			pred_class_index = probs.argmax().item()
-			text += f"-> Predicted class: \"{classes[pred_class_index]}\""
+		pred_class_index = probs.argmax().item()
+		text += f"-> Predicted class: \"{classes[pred_class_index]}\""
 
-			draw.multiline_text((x_coordinate, y_coordinate), text=text, font=font, fill=(255,0,0,0), align="left", spacing=3)
-			probs = probs.tolist()
+		draw.multiline_text((x_coordinate, y_coordinate), text=text, font=font, fill=(255,0,0,0), align="left", spacing=3)
+		probs = probs.tolist()
 
 	return img_draw, probs
+
 
 def main():
 	st.title("Emotion Detection Model")
@@ -80,6 +91,8 @@ def main():
 			 caption="Example of model being run on an image.",
 			 use_column_width=True)
 	st.write("## Upload your own image")
+	st.write("note: if the upload fails, please click the 'x' on the right and try uploading again")
+	st.write("Sometimes uploading takes a couple of tries.")
 	uploaded_image = st.file_uploader("Choose a png or jpg image",
 									  type=["jpg", "png", "jpeg"])
 
