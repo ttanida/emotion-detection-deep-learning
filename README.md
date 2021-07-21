@@ -27,8 +27,10 @@ I used transfer learning by using a [Inception Resnet (V1) model](https://github
 
 I trained a newly initizalized 1x1 conv layer (to reduce the channel dim of the feature maps) and 3 newly initizalized linear layers (to gradually decrease the output dim to 3 classes) with training data webscraped from Google Images. The model file can be found [here](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/app/my_code/model.py).
 
-The dataset consisted of 1507 images, roughly 500 images per class.
+The dataset consisted of 1507 images, roughly 500 images per class. It can found in [this google drive folder](https://drive.google.com/drive/folders/1h94EmiPXh3lMVtnwVH45kLaCh64Glp6t?usp=sharing).
 
 I used various transformations (RandomHorizontalFlip, RandomRotation, ColorJitter, GaussianBlur) on the train set to augment the data.
 
 The whole training procedure is described in the jupyter notebook [emotion_detection.ipynb](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/emotion_detection.ipynb)
+
+The final model achieved a test set accuracy of 88%.
