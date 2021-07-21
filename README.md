@@ -34,3 +34,15 @@ I used various transformations (RandomHorizontalFlip, RandomRotation, ColorJitte
 The whole training procedure is described in the jupyter notebook [emotion_detection.ipynb](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/emotion_detection.ipynb)
 
 The final model achieved a test set accuracy of 88%.
+
+## What was the motivation for creating the project?
+
+There have been a number of studies that suggest that communication between humans is largely non-verbal.
+
+Since human-machine interactions are becoming more and more prominent in daily life, it would be beneficial if machines would have a notion of how the people they interact with feel and adjust their actions accordingly.
+
+One example would that of a semi-autonomous car that monitors a driver's emotions to manage the degree of control the driver has over the car. If for example the driver appears upset, then the car could increase its control of the driving and decrease the control of the driver.
+
+This model can of course only detect a very limited range of emotions (I chose "angry", "happy", "sad" because I thought they were easier to detect than more subtle emotions), and there are probably more sophisticated ways of solving this task (such as using facial landmarks), but I wanted to see how far I would get with a simple, naive solution first.
+
+It was also fun and instructive to complete a whole ML/DL project end-to-end, going from the data collection and preprocessing to picking the model architecture and hyperparameter tuning until testing and deploying.
