@@ -17,15 +17,18 @@ Afterwards, my model uses the extracted face to output the probabilities for eac
 This has 2 benefits: 
 
 (1) my model always receives images of the same resolution (160x160), so the model architecture is designed accordingly <br />
-(2) my model can use its full "power" on predicting emotions for the given face, and doesn't have to first find a face in an image
+(2) my model can use its "full power" on predicting emotions for the given face, and doesn't have to first find a face in an image
 
 <img src="https://github.com/ttanida/emotion-detection-deep-learning/blob/main/images_for_README/model_overview.png">
 
 ## How was the model trained?
 
-I used transfer learning by using a [Inception Resnet (V1) model](https://github.com/timesler/facenet-pytorch/) pretrained on VGGFace2.
+I used transfer learning by using a [Inception Resnet (V1) model](https://github.com/timesler/facenet-pytorch/) pretrained on VGGFace2 as a feature extractor (by freezing all but the last 3 layers).
 
-The Inception Resnet was used as a feature extractor (by )
+I trained a newly initizalized 1x1 conv layer (to reduce the channel dim of the feature maps) and 3 newly initizalized linear layers (to gradually decrease the output dim to 3 classes) with training data webscraped from Google Images. The model file can be found [here](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/app/my_code/model.py).
 
-<img src="https://github.com/ttanida/emotion-detection-deep-learning/blob/main/images_for_README/old_architecture.png" width="650" height="250" />
-<img src="https://github.com/ttanida/emotion-detection-deep-learning/blob/main/images_for_README/new_architecture.png" width="850" height="300" />
+The dataset consisted of 1507 images, roughly 500 images per class.
+
+I used various transformations (RandomHorizontalFlip, RandomRotation, ColorJitter, GaussianBlur) on the train set to augment the data.
+
+The whole training procedure is described in the jupyter notebook [emotion_detection.ipynb](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/emotion_detection.ipynb)
