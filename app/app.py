@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torchvision.transforms.functional import rotate
 
 from PIL import Image, ImageDraw, ImageFont
-from facenet_pytorch import MTCNN, extract_face
+from facenet_pytorch import MTCNN
 
 from my_code.model import EmotionDetectionModel
 
@@ -15,7 +15,7 @@ model.eval()
 
 def make_inference(img):
 	"""  Makes inference on single image.
-	Returns image with predictions drawn on and class probs as a list
+	Returns image with predictions drawn on and class probs as a torch tensor
 
 	angry: class 0
 	happy: class 1
@@ -23,9 +23,15 @@ def make_inference(img):
 
 	Params:
 	-------
-	img (PIL)"""
+	img (PIL)
+
+	Returns:
+	-------
+	img_draw (PIL)
+	probs (torch tensor)"""
 
 	with torch.no_grad():
+		# use mtcnn to extract the face in the image
 		mtcnn = MTCNN(image_size=160, select_largest=False, margin=20, min_face_size=10, post_process=True, thresholds=[0.8, 0.9, 0.9])
 		face_img = mtcnn(img)
 
@@ -41,44 +47,66 @@ def make_inference(img):
 				# so we have to rotate it counter-clockwise to get the correct face image
 				face_img = rotate(face_img, angle=-90)
 
+		# get the scores and corresponding class probs
 		scores = model(face_img).squeeze()
 		probs = F.softmax(scores, dim=0)
 
-		# draw a red box around detected face
-		box, _ = mtcnn.detect(img)
-		img_draw = img.copy()
-		draw = ImageDraw.Draw(img_draw)
-		draw.rectangle(box[0], width=5, outline=(255, 0, 0))
-
-		classes = ['angry', 'happy', 'sad']
-		x_coordinate = box[0][0]
-		y_coordinate = box[0][3]
-
-		txt = "probability class \"angry\": 80%"
-		fontsize = 1  # starting font size
-
-		# portion of image width you want text width to be
-		img_fraction = 0.4
-
-		font_path = "font/Arialnb.ttf"
-		font = ImageFont.truetype(font_path, fontsize)
-		while font.getsize(txt)[0] < img_fraction * img_draw.size[0]:
-			# iterate until the text size is just larger than the criteria
-			fontsize += 1
-			font = ImageFont.truetype(font_path, fontsize)
-
-		fontsize -= 1
-		font = ImageFont.truetype(font_path, fontsize)
-		text = ""
-		for i, class_ in enumerate(classes):
-			text += f"probability class \"{class_}\": {probs[i]:.0%}\n"
-
-		pred_class_index = probs.argmax().item()
-		text += f"-> Predicted class: \"{classes[pred_class_index]}\""
-
-		draw.multiline_text((x_coordinate, y_coordinate), text=text, font=font, fill=(255,0,0,0), align="left", spacing=3)
+		# draw a red box around the detected face with the class probs underneath it
+		img_draw = draw_box_with_probs(img, probs, mtcnn)
 
 	return img_draw, probs
+
+def draw_box_with_probs(img, probs, mtcnn):
+	"""Returns image with red box around detected face and the class probs displayed underneath it
+	Params:
+	-------
+	img (PIL)
+	probs (torch tensor)
+
+	Returns:
+	-------
+	img_draw (PIL), image with red box and class probs on it"""
+
+	# draw a red box around detected face
+	box, _ = mtcnn.detect(img)
+	img_draw = img.copy()
+	draw = ImageDraw.Draw(img_draw)
+	draw.rectangle(box[0], width=5, outline=(255, 0, 0))
+
+	# x and y coordinates specify the lower left corner of the box
+	# this is where the class probs will be displayed
+	x_coordinate = box[0][0]
+	y_coordinate = box[0][3]
+
+	# since images have variable resolutions, we need to adjust the font size accordingly
+	fontsize = 1  # starting font size
+	img_fraction = 0.4 # portion of image width the text width is going to be
+
+	txt = "probability class \"angry\": 80%"  # sample txt to see how big the font has to be
+	font_path = "font/Arialnb.ttf"
+
+	font = ImageFont.truetype(font_path, fontsize)
+	while font.getsize(txt)[0] < img_fraction * img_draw.size[0]:
+		# iterate until the text size is just larger than the criteria
+		fontsize += 1
+		font = ImageFont.truetype(font_path, fontsize)
+
+	fontsize -= 1  # decrease the font size by one just in case
+	font = ImageFont.truetype(font_path, fontsize)  # final font specifications
+
+	# index of predicted class
+	pred_class_index = probs.argmax().item()
+
+	# write the text with the class probs
+	classes = ['angry', 'happy', 'sad']
+	text = ""
+	for i, class_ in enumerate(classes):
+		text += f"probability class \"{class_}\": {probs[i]:.0%}\n"
+	text += f"-> Predicted class: \"{classes[pred_class_index]}\""
+
+	draw.multiline_text((x_coordinate, y_coordinate), text=text, font=font, fill=(255, 0, 0, 0), align="left", spacing=3)
+
+	return img_draw
 
 
 def main():
