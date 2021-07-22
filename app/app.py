@@ -56,6 +56,7 @@ def make_inference(img):
 
 	return img_draw, probs
 
+
 def draw_box_with_probs(img, probs, mtcnn):
 	"""Returns image with red box around detected face and the class probs displayed underneath it
 	Params:
