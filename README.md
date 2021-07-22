@@ -1,5 +1,5 @@
 # emotion-detection-deep-learning
-A pytorch model that classifies images of people to 3 distinct emotions
+A pytorch model that classifies images of people to 3 distinct emotions: happy, angry, sad
 
 <img src="https://github.com/ttanida/emotion-detection-deep-learning/blob/main/images_for_README/sample_img.jpeg" width="650" height="700" />
 
