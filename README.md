@@ -41,7 +41,7 @@ There have been a number of studies that suggest that communication between huma
 
 Since human-machine interactions are becoming more and more prominent in daily life, it would be beneficial if machines would have a notion of how the people they interact with feel and adjust their actions accordingly.
 
-One example would that of a semi-autonomous car that monitors a driver's emotions to manage the degree of control the driver has over the car. If for example the driver appears upset, then the car could increase its control of the driving and decrease the control of the driver.
+One example would be that of a semi-autonomous car that monitors the driver's emotions to manage the degree of control the driver has over the car. If for example the driver appears upset, then the car could increase its control of the driving and decrease the control of the driver.
 
 This model can of course only detect a very limited range of emotions (I chose "angry", "happy", "sad" because I thought they were easier to detect than more subtle emotions), and there are probably more sophisticated ways of solving this task (such as using facial landmarks), but I wanted to see how far I would get with a simple, naive solution first.
 
