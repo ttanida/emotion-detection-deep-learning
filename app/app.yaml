@@ -6,7 +6,7 @@ automatic_scaling:
 
 resources:
   cpu: 2
-  memory_gb: 10
-  disk_size_gb: 50
+  memory_gb: 5
+  disk_size_gb: 20
   
 
