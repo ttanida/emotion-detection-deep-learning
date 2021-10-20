@@ -25,7 +25,7 @@ This has 2 benefits:
 
 I used transfer learning by using a [Inception Resnet (V1) model](https://github.com/timesler/facenet-pytorch/) pretrained on VGGFace2 as a feature extractor (by freezing all but the last 3 layers).
 
-I trained a newly initizalized 1x1 conv layer (to reduce the channel dim of the feature maps) and 3 newly initizalized linear layers (to gradually decrease the output dim to 3 classes) with training data webscraped from Google Images. The model file can be found [here](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/app/my_code/model.py).
+I trained a newly initizalized 1x1 conv layer (to reduce the channel dimension of the feature maps) and 3 newly initizalized linear layers (to gradually decrease the output dimension to 3 classes) with training data webscraped from Google Images. The model file can be found [here](https://github.com/ttanida/emotion-detection-deep-learning/blob/main/app/my_code/model.py).
 
 The dataset consisted of 1507 images, roughly 500 images per class. It can found in [this google drive folder](https://drive.google.com/drive/folders/1h94EmiPXh3lMVtnwVH45kLaCh64Glp6t?usp=sharing).
 
